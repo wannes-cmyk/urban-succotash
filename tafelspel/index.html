@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tafels Kampioen</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <main class="app">
+
+    <!-- STARTSCHERM -->
+    <section id="start-screen" class="screen">
+      <h1>🏆 Tafels Kampioen</h1>
+      <p class="subtitle">Oefen je maal- en deeltafels!</p>
+
+      <div class="choice-group">
+        <h2>In welk leerjaar zit je?</h2>
+        <div class="choice-buttons" id="grade-buttons">
+          <button class="choice-btn" data-grade="2">2de leerjaar</button>
+          <button class="choice-btn" data-grade="3">3de leerjaar</button>
+        </div>
+      </div>
+
+      <div class="choice-group">
+        <h2>Wat wil je oefenen?</h2>
+        <div class="choice-buttons" id="mode-buttons">
+          <button class="choice-btn" data-mode="maal">Maaltafels ✖️</button>
+          <button class="choice-btn" data-mode="deel">Deeltafels ➗</button>
+          <button class="choice-btn" data-mode="mix">Allebei door elkaar 🔀</button>
+        </div>
+      </div>
+
+      <button id="start-btn" class="primary-btn" disabled>Start!</button>
+    </section>
+
+    <!-- QUIZSCHERM -->
+    <section id="quiz-screen" class="screen hidden">
+      <div class="quiz-header">
+        <span id="question-counter">Vraag 1 / 10</span>
+        <span id="score-counter">Score: 0</span>
+      </div>
+
+      <div class="progress-bar">
+        <div id="progress-fill"></div>
+      </div>
+
+      <div class="question-card">
+        <p id="question-text">3 x 4 = ?</p>
+      </div>
+
+      <form id="answer-form" class="answer-form" autocomplete="off">
+        <input type="number" id="answer-input" class="answer-input" inputmode="numeric" placeholder="?" required>
+        <button type="submit" class="primary-btn">Check!</button>
+      </form>
+
+      <p id="feedback-text" class="feedback"></p>
+    </section>
+
+    <!-- RESULTAATSCHERM -->
+    <section id="result-screen" class="screen hidden">
+      <h1>Klaar!</h1>
+      <div id="stars" class="stars"></div>
+      <p id="result-text" class="result-text"></p>
+      <p id="result-score"></p>
+      <button id="replay-btn" class="primary-btn">Nog een keer!</button>
+      <button id="menu-btn" class="secondary-btn">Terug naar start</button>
+    </section>
+
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>

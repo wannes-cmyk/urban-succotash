@@ -6,6 +6,7 @@
   --dark: #172c66;
   --success: #6bcf7f;
   --error: #f45b69;
+  --warning: #f4a259;
   --card-bg: #ffffff;
 }
 
@@ -140,7 +141,7 @@ h1 {
   background: var(--bg);
   border-radius: 6px;
   overflow: hidden;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 #progress-fill {
@@ -148,6 +149,35 @@ h1 {
   width: 10%;
   background: var(--secondary);
   transition: width 0.3s ease;
+}
+
+.timer-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.timer-bar {
+  flex: 1;
+  height: 10px;
+  background: var(--bg);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+#timer-fill {
+  height: 100%;
+  width: 100%;
+  background: var(--success);
+  transition: width 0.1s linear, background 0.2s ease;
+}
+
+#timer-seconds {
+  font-weight: bold;
+  font-size: 0.95rem;
+  min-width: 30px;
+  text-align: right;
 }
 
 .question-card {
@@ -230,4 +260,59 @@ h1 {
 #result-score {
   color: #6b7280;
   margin-bottom: 24px;
+}
+
+/* Overzichtscherm */
+.session-select {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+  font-weight: bold;
+  border: 3px solid var(--secondary);
+  border-radius: 14px;
+  background: white;
+  color: var(--dark);
+  margin-bottom: 12px;
+}
+
+.session-meta {
+  color: #6b7280;
+  font-size: 0.95rem;
+  margin-bottom: 16px;
+}
+
+.table-wrap {
+  overflow-x: auto;
+  margin-bottom: 16px;
+  border-radius: 14px;
+  border: 2px solid var(--bg);
+}
+
+.session-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.session-table th,
+.session-table td {
+  padding: 8px 10px;
+  text-align: center;
+  border-bottom: 1px solid var(--bg);
+  white-space: nowrap;
+}
+
+.session-table th {
+  background: var(--accent);
+  color: var(--dark);
+}
+
+.session-table td.result-correct {
+  color: var(--success);
+  font-weight: bold;
+}
+
+.session-table td.result-wrong {
+  color: var(--error);
+  font-weight: bold;
 }

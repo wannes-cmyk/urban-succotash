@@ -32,7 +32,26 @@
         </div>
       </div>
 
+      <div class="choice-group hidden" id="difficulty-group">
+        <h2>Moeilijkheidsgraad</h2>
+        <div class="choice-buttons" id="difficulty-buttons">
+          <button class="choice-btn" data-difficulty="normaal">Gewone mix</button>
+          <button class="choice-btn" data-difficulty="moeilijk">Focus op moeilijkste tafels</button>
+        </div>
+      </div>
+
+      <div class="choice-group hidden" id="count-group">
+        <h2>Hoeveel oefeningen?</h2>
+        <div class="choice-buttons" id="count-buttons">
+          <button class="choice-btn" data-count="10">10</button>
+          <button class="choice-btn" data-count="20">20</button>
+          <button class="choice-btn" data-count="30">30</button>
+          <button class="choice-btn" data-count="50">50</button>
+        </div>
+      </div>
+
       <button id="start-btn" class="primary-btn" disabled>Start!</button>
+      <button id="overview-menu-btn" class="secondary-btn">📋 Bekijk overzicht</button>
     </section>
 
     <!-- QUIZSCHERM -->
@@ -44,6 +63,13 @@
 
       <div class="progress-bar">
         <div id="progress-fill"></div>
+      </div>
+
+      <div id="timer-wrap" class="timer-wrap hidden">
+        <div class="timer-bar">
+          <div id="timer-fill"></div>
+        </div>
+        <span id="timer-seconds">10s</span>
       </div>
 
       <div class="question-card">
@@ -65,11 +91,48 @@
       <p id="result-text" class="result-text"></p>
       <p id="result-score"></p>
       <button id="replay-btn" class="primary-btn">Nog een keer!</button>
+      <button id="view-overview-btn" class="secondary-btn">📋 Bekijk overzicht van deze ronde</button>
       <button id="menu-btn" class="secondary-btn">Terug naar start</button>
+    </section>
+
+    <!-- OVERZICHTSCHERM -->
+    <section id="overview-screen" class="screen hidden">
+      <h1>📋 Overzicht</h1>
+
+      <div id="overview-empty" class="hidden">
+        <p class="subtitle">Er zijn nog geen oefenrondes opgeslagen.</p>
+      </div>
+
+      <div id="overview-content" class="hidden">
+        <select id="session-select" class="session-select"></select>
+
+        <p id="session-meta" class="session-meta"></p>
+
+        <div class="table-wrap">
+          <table id="session-table" class="session-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Som</th>
+                <th>Antwoord</th>
+                <th>Juist antwoord</th>
+                <th>Resultaat</th>
+              </tr>
+            </thead>
+            <tbody id="session-table-body"></tbody>
+          </table>
+        </div>
+
+        <button id="download-pdf-btn" class="primary-btn">⬇️ Download als PDF</button>
+        <button id="clear-history-btn" class="secondary-btn">Wis geschiedenis</button>
+      </div>
+
+      <button id="overview-back-btn" class="secondary-btn">Terug naar start</button>
     </section>
 
   </main>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="script.js"></script>
 </body>
 </html>

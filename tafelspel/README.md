@@ -5,9 +5,9 @@ Een klein browserspelletje om maal- en deeltafels te oefenen, gemaakt voor het 2
 ## Hoe werkt het
 
 1. Open `index.html` in een browser (dubbelklikken volstaat, of host de map via GitHub Pages).
-2. Kies je leerjaar:
-   - **2de leerjaar** → standaard tafels van 1, 2, 5 en 10. Vaste 10 vragen.
-   - **3de leerjaar** → standaard alle tafels van 1 tot 10, met extra opties:
+2. Kies je leerjaar. Beide leerjaren oefenen standaard alle tafels van 1 tot 10 door elkaar:
+   - **2de leerjaar** → vaste 10 vragen, geen extra opties.
+   - **3de leerjaar** → vooral herhaling, met extra oefenopties:
      - **Moeilijkheidsgraad**: gewone mix, of focus op de moeilijkste tafels (3, 4, 6, 7, 8, 9)
      - **Aantal oefeningen**: 10, 20, 30 of 50
      - **Timer**: aan/uit te zetten, standaard 10 seconden per vraag zodat er niet te lang nagedacht wordt

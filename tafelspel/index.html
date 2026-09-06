@@ -23,6 +23,15 @@
         </div>
       </div>
 
+      <div class="choice-group hidden" id="tablemode-group">
+        <h2>Welke tafels?</h2>
+        <div class="choice-buttons" id="tablemode-buttons">
+          <button class="choice-btn" data-tablemode="all">Alle tafels door elkaar</button>
+          <button class="choice-btn" data-tablemode="custom">Zelf tafels kiezen</button>
+        </div>
+        <div class="tables-checkboxes hidden" id="tables-checkboxes"></div>
+      </div>
+
       <div class="choice-group">
         <h2>Wat wil je oefenen?</h2>
         <div class="choice-buttons" id="mode-buttons">
@@ -48,6 +57,14 @@
           <button class="choice-btn" data-count="30">30</button>
           <button class="choice-btn" data-count="50">50</button>
         </div>
+      </div>
+
+      <div class="choice-group hidden" id="timer-toggle-group">
+        <h2>Timer</h2>
+        <label class="toggle-row">
+          <input type="checkbox" id="timer-toggle-checkbox" checked>
+          <span>⏱ Tijdslimiet van 10 seconden per vraag</span>
+        </label>
       </div>
 
       <button id="start-btn" class="primary-btn" disabled>Start!</button>

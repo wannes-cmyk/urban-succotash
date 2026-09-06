@@ -14,6 +14,8 @@ const MAX_HISTORY_SESSIONS = 20;
 const state = {
   grade: null,
   mode: null,
+  tableMode: null,
+  selectedTables: [],
   difficulty: null,
   questionCount: null,
   totalQuestions: 10,
@@ -35,11 +37,16 @@ const resultScreen = document.getElementById('result-screen');
 const overviewScreen = document.getElementById('overview-screen');
 
 const gradeButtons = document.getElementById('grade-buttons');
+const tablemodeGroup = document.getElementById('tablemode-group');
+const tablemodeButtons = document.getElementById('tablemode-buttons');
+const tablesCheckboxes = document.getElementById('tables-checkboxes');
 const modeButtons = document.getElementById('mode-buttons');
 const difficultyGroup = document.getElementById('difficulty-group');
 const difficultyButtons = document.getElementById('difficulty-buttons');
 const countGroup = document.getElementById('count-group');
 const countButtons = document.getElementById('count-buttons');
+const timerToggleGroup = document.getElementById('timer-toggle-group');
+const timerToggleCheckbox = document.getElementById('timer-toggle-checkbox');
 const startBtn = document.getElementById('start-btn');
 const overviewMenuBtn = document.getElementById('overview-menu-btn');
 
@@ -80,6 +87,7 @@ gradeButtons.addEventListener('click', (e) => {
   const isGrade3 = state.grade === 3;
   difficultyGroup.classList.toggle('hidden', !isGrade3);
   countGroup.classList.toggle('hidden', !isGrade3);
+  timerToggleGroup.classList.toggle('hidden', !isGrade3);
 
   if (!isGrade3) {
     state.difficulty = null;
@@ -88,6 +96,49 @@ gradeButtons.addEventListener('click', (e) => {
     [...countButtons.children].forEach((b) => b.classList.remove('selected'));
   }
 
+  // Tafelkeuze hoort bij het leerjaar (2de: 1,2,5,10 - 3de: 1 t/m 10), dus altijd resetten.
+  tablemodeGroup.classList.remove('hidden');
+  state.tableMode = null;
+  state.selectedTables = [];
+  [...tablemodeButtons.children].forEach((b) => b.classList.remove('selected'));
+  tablesCheckboxes.classList.add('hidden');
+  buildTableCheckboxes(state.grade);
+
+  checkReadyToStart();
+});
+
+tablemodeButtons.addEventListener('click', (e) => {
+  const btn = e.target.closest('.choice-btn');
+  if (!btn) return;
+  state.tableMode = btn.dataset.tablemode;
+  [...tablemodeButtons.children].forEach((b) => b.classList.toggle('selected', b === btn));
+
+  const isCustom = state.tableMode === 'custom';
+  tablesCheckboxes.classList.toggle('hidden', !isCustom);
+  if (!isCustom) {
+    state.selectedTables = [];
+  }
+
+  checkReadyToStart();
+});
+
+function buildTableCheckboxes(grade) {
+  tablesCheckboxes.innerHTML = '';
+  TABLES_BY_GRADE[grade].forEach((t) => {
+    const label = document.createElement('label');
+    label.className = 'table-checkbox';
+    label.innerHTML = `<input type="checkbox" value="${t}"> Tafel van ${t}`;
+    tablesCheckboxes.appendChild(label);
+  });
+}
+
+tablesCheckboxes.addEventListener('change', () => {
+  const checked = [...tablesCheckboxes.querySelectorAll('input[type="checkbox"]:checked')];
+  state.selectedTables = checked.map((c) => Number(c.value));
+  [...tablesCheckboxes.querySelectorAll('.table-checkbox')].forEach((label) => {
+    const input = label.querySelector('input');
+    label.classList.toggle('checked', input.checked);
+  });
   checkReadyToStart();
 });
 
@@ -117,7 +168,8 @@ countButtons.addEventListener('click', (e) => {
 
 function checkReadyToStart() {
   const grade3Ready = state.grade === 3 ? !!(state.difficulty && state.questionCount) : true;
-  startBtn.disabled = !(state.grade && state.mode && grade3Ready);
+  const tableModeReady = state.tableMode === 'custom' ? state.selectedTables.length > 0 : !!state.tableMode;
+  startBtn.disabled = !(state.grade && state.mode && tableModeReady && grade3Ready);
 }
 
 startBtn.addEventListener('click', startGame);
@@ -138,10 +190,11 @@ answerForm.addEventListener('submit', (e) => {
 // ---- Spel opbouwen ----
 function startGame() {
   state.totalQuestions = state.grade === 3 ? state.questionCount : 10;
-  state.timerEnabled = state.grade === 3;
+  state.timerEnabled = state.grade === 3 && timerToggleCheckbox.checked;
 
   const difficulty = state.grade === 3 ? state.difficulty : 'normaal';
-  state.questions = generateQuestions(state.grade, state.mode, state.totalQuestions, difficulty);
+  const tables = state.tableMode === 'custom' ? state.selectedTables : TABLES_BY_GRADE[state.grade];
+  state.questions = generateQuestions(tables, state.mode, state.totalQuestions, difficulty);
   state.currentIndex = 0;
   state.score = 0;
   state.correctCount = 0;
@@ -166,8 +219,7 @@ function pickWeightedTable(tables, difficulty) {
   return weighted[Math.floor(Math.random() * weighted.length)];
 }
 
-function generateQuestions(grade, mode, count, difficulty) {
-  const tables = TABLES_BY_GRADE[grade];
+function generateQuestions(tables, mode, count, difficulty) {
   const questions = [];
 
   for (let i = 0; i < count; i++) {
@@ -352,12 +404,18 @@ function saveRoundToHistory() {
   const sessions = loadHistory();
 
   const modeLabels = { maal: 'Maaltafels', deel: 'Deeltafels', mix: 'Mix' };
+  const tablesLabel = state.tableMode === 'custom'
+    ? `tafels van ${[...state.selectedTables].sort((a, b) => a - b).join(', ')}`
+    : 'alle tafels';
+
   const session = {
     date: new Date().toISOString(),
     grade: state.grade,
     mode: state.mode,
     modeLabel: modeLabels[state.mode] || state.mode,
     difficulty: state.difficulty,
+    tablesLabel,
+    timerEnabled: state.timerEnabled,
     total: state.totalQuestions,
     correctCount: state.correctCount,
     score: state.score,
@@ -414,7 +472,8 @@ function renderSessionDetail(sessions, index) {
   const session = sessions[index];
   if (!session) return;
 
-  sessionMeta.textContent = `Score: ${session.score} punten - ${session.correctCount} van de ${session.total} juist`;
+  const timerLabel = session.timerEnabled ? 'timer aan' : 'timer uit';
+  sessionMeta.textContent = `${session.tablesLabel || 'alle tafels'} - ${timerLabel} - Score: ${session.score} punten - ${session.correctCount} van de ${session.total} juist`;
 
   sessionTableBody.innerHTML = '';
   session.questions.forEach((q, i) => {
@@ -458,6 +517,9 @@ function downloadSessionAsPdf(session) {
   doc.text(`Datum: ${d.toLocaleString('nl-BE')}`, margin, y);
   y += 6;
   doc.text(`Leerjaar: ${session.grade}de leerjaar - ${session.modeLabel}`, margin, y);
+  y += 6;
+  const timerLabel = session.timerEnabled ? 'timer aan' : 'timer uit';
+  doc.text(`Tafels: ${session.tablesLabel || 'alle tafels'} - ${timerLabel}`, margin, y);
   y += 6;
   doc.text(`Score: ${session.score} punten - ${session.correctCount} van de ${session.total} juist`, margin, y);
   y += 10;

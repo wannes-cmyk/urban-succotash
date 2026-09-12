@@ -1,18 +1,21 @@
 # Tafels Kampioen
 
-Een klein browserspelletje om maal- en deeltafels te oefenen, gemaakt voor het 2de en 3de leerjaar.
+Een klein browserspelletje om tafels en hoofdrekenen te oefenen, gemaakt voor het 2de en 3de leerjaar.
 
 ## Hoe werkt het
 
 1. Open `index.html` in een browser (dubbelklikken volstaat, of host de map via GitHub Pages).
-2. Kies je leerjaar. Beide leerjaren oefenen standaard alle tafels van 1 tot 10 door elkaar:
-   - **2de leerjaar** → vaste 10 vragen, geen extra opties.
-   - **3de leerjaar** → vooral herhaling, met extra oefenopties:
-     - **Moeilijkheidsgraad**: gewone mix, of focus op de moeilijkste tafels (3, 4, 6, 7, 8, 9)
-     - **Aantal oefeningen**: 10, 20, 30 of 50
-     - **Timer**: aan/uit te zetten, standaard 10 seconden per vraag zodat er niet te lang nagedacht wordt
-3. Kies welke tafels je wil oefenen: alle tafels door elkaar, of "Zelf tafels kiezen" om via aanvinkvakjes specifieke tafels te selecteren (bv. enkel de tafel van 7). Werkt voor beide leerjaren.
-4. Kies wat je wil oefenen: maaltafels, deeltafels, of een mix.
+2. Kies je leerjaar: 2de of 3de leerjaar.
+3. Kies wat je wil oefenen:
+   - **Tafels ✖️➗**
+     - Kies welke tafels: alle tafels van 1 tot 10 door elkaar, of "Zelf tafels kiezen" om via aanvinkvakjes specifieke tafels te selecteren (bv. enkel de tafel van 7).
+     - Kies maaltafels, deeltafels, of een mix.
+     - Kies de moeilijkheidsgraad: gewone mix, of focus op de moeilijkste tafels (3, 4, 6, 7, 8, 9).
+   - **Hoofdrekenen ➕➖**
+     - 2de leerjaar: Splitsen (tot 10), Optellen & aftrekken met brug over het tiental (tot 20), of Optellen & aftrekken (tot 100).
+     - 3de leerjaar: Optellen & aftrekken (tot 1000).
+     - Optellen en aftrekken worden altijd door elkaar geoefend (geen aparte keuze zoals bij tafels).
+4. Kies het aantal oefeningen (10, 20, 30 of 50) en of de timer aan moet staan (standaard 10 seconden per vraag zodat er niet te lang nagedacht wordt). Deze opties gelden voor beide leerjaren en beide oefenvormen.
 5. Beantwoord de sommen door het antwoord in te typen en op "Check!" te drukken (of Enter).
 6. Op het einde krijg je je score en 1 tot 3 sterren.
 
@@ -33,4 +36,4 @@ Zuiver HTML, CSS en vanilla JavaScript, plus [jsPDF](https://github.com/parallax
 
 - `index.html` - structuur van de vier schermen (start, quiz, resultaat, overzicht)
 - `style.css` - kleurrijke, kindvriendelijke styling
-- `script.js` - spellogica: vragen genereren (met gewogen moeilijkheidsgraad), timer, score bijhouden, geschiedenis in localStorage, PDF-export
+- `script.js` - spellogica: vragen genereren voor tafels én hoofdrekenen (splitsen, brug over het tiental, optellen/aftrekken tot 100 of 1000), timer, score bijhouden, geschiedenis in localStorage, PDF-export

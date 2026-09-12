@@ -1,4 +1,4 @@
-// Tafels Kampioen - maal- en deeltafelspel voor 2de en 3de leerjaar
+// Tafels Kampioen - maal-/deeltafels en hoofdrekenen voor 2de en 3de leerjaar
 
 const TABLES_BY_GRADE = {
   2: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
@@ -7,16 +7,37 @@ const TABLES_BY_GRADE = {
 
 const HARD_TABLES = [3, 4, 6, 7, 8, 9];
 
-const TIME_PER_QUESTION_MS = 10000; // 10 seconden per vraag, enkel 3de leerjaar
+// Welke hoofdrekenen-oefeningen er per leerjaar te kiezen zijn.
+const HOOFDREKENEN_OPTIONS = {
+  2: [
+    { value: 'splitsen', label: 'Splitsen (tot 10)' },
+    { value: 'brug', label: 'Optellen & aftrekken met brug (tot 20)' },
+    { value: 'optellen100', label: 'Optellen & aftrekken (tot 100)' },
+  ],
+  3: [
+    { value: 'optellen1000', label: 'Optellen & aftrekken (tot 1000)' },
+  ],
+};
+
+const EXERCISE_LABELS = {
+  splitsen: 'Splitsen (tot 10)',
+  brug: 'Optellen & aftrekken met brug (tot 20)',
+  optellen100: 'Optellen & aftrekken (tot 100)',
+  optellen1000: 'Optellen & aftrekken (tot 1000)',
+};
+
+const TIME_PER_QUESTION_MS = 10000; // 10 seconden per vraag, als de timer aan staat
 const HISTORY_KEY = 'tafelspelGeschiedenis';
 const MAX_HISTORY_SESSIONS = 20;
 
 const state = {
   grade: null,
-  mode: null,
+  category: null, // 'tafels' | 'hoofdrekenen'
+  mode: null, // enkel bij tafels: 'maal' | 'deel' | 'mix'
   tableMode: null,
   selectedTables: [],
-  difficulty: null,
+  difficulty: null, // enkel bij tafels
+  exerciseType: null, // enkel bij hoofdrekenen
   questionCount: null,
   totalQuestions: 10,
   timerEnabled: false,
@@ -37,12 +58,17 @@ const resultScreen = document.getElementById('result-screen');
 const overviewScreen = document.getElementById('overview-screen');
 
 const gradeButtons = document.getElementById('grade-buttons');
+const categoryGroup = document.getElementById('category-group');
+const categoryButtons = document.getElementById('category-buttons');
 const tablemodeGroup = document.getElementById('tablemode-group');
 const tablemodeButtons = document.getElementById('tablemode-buttons');
 const tablesCheckboxes = document.getElementById('tables-checkboxes');
+const modeGroup = document.getElementById('mode-group');
 const modeButtons = document.getElementById('mode-buttons');
 const difficultyGroup = document.getElementById('difficulty-group');
 const difficultyButtons = document.getElementById('difficulty-buttons');
+const hoofdrekenenGroup = document.getElementById('hoofdrekenen-group');
+const hoofdrekenenButtons = document.getElementById('hoofdrekenen-buttons');
 const countGroup = document.getElementById('count-group');
 const countButtons = document.getElementById('count-buttons');
 const timerToggleGroup = document.getElementById('timer-toggle-group');
@@ -84,25 +110,77 @@ gradeButtons.addEventListener('click', (e) => {
   state.grade = Number(btn.dataset.grade);
   [...gradeButtons.children].forEach((b) => b.classList.toggle('selected', b === btn));
 
-  const isGrade3 = state.grade === 3;
-  difficultyGroup.classList.toggle('hidden', !isGrade3);
-  countGroup.classList.toggle('hidden', !isGrade3);
-  timerToggleGroup.classList.toggle('hidden', !isGrade3);
-
-  if (!isGrade3) {
-    state.difficulty = null;
-    state.questionCount = null;
-    [...difficultyButtons.children].forEach((b) => b.classList.remove('selected'));
-    [...countButtons.children].forEach((b) => b.classList.remove('selected'));
-  }
-
-  // Tafelkeuze hoort bij het leerjaar (2de: 1,2,5,10 - 3de: 1 t/m 10), dus altijd resetten.
-  tablemodeGroup.classList.remove('hidden');
+  // Alles na leerjaar hangt af van de categorie, dus resetten en opnieuw laten kiezen.
+  state.category = null;
   state.tableMode = null;
   state.selectedTables = [];
+  state.mode = null;
+  state.difficulty = null;
+  state.exerciseType = null;
+  state.questionCount = null;
+
+  [...categoryButtons.children].forEach((b) => b.classList.remove('selected'));
   [...tablemodeButtons.children].forEach((b) => b.classList.remove('selected'));
+  [...modeButtons.children].forEach((b) => b.classList.remove('selected'));
+  [...difficultyButtons.children].forEach((b) => b.classList.remove('selected'));
+  [...countButtons.children].forEach((b) => b.classList.remove('selected'));
+
   tablesCheckboxes.classList.add('hidden');
-  buildTableCheckboxes(state.grade);
+  tablesCheckboxes.innerHTML = '';
+  hoofdrekenenButtons.innerHTML = '';
+
+  categoryGroup.classList.remove('hidden');
+  tablemodeGroup.classList.add('hidden');
+  modeGroup.classList.add('hidden');
+  difficultyGroup.classList.add('hidden');
+  hoofdrekenenGroup.classList.add('hidden');
+  countGroup.classList.add('hidden');
+  timerToggleGroup.classList.add('hidden');
+
+  checkReadyToStart();
+});
+
+categoryButtons.addEventListener('click', (e) => {
+  const btn = e.target.closest('.choice-btn');
+  if (!btn) return;
+  state.category = btn.dataset.category;
+  [...categoryButtons.children].forEach((b) => b.classList.toggle('selected', b === btn));
+
+  const isTafels = state.category === 'tafels';
+
+  // Tafel-keuzes resetten
+  state.tableMode = null;
+  state.selectedTables = [];
+  state.mode = null;
+  state.difficulty = null;
+  [...tablemodeButtons.children].forEach((b) => b.classList.remove('selected'));
+  [...modeButtons.children].forEach((b) => b.classList.remove('selected'));
+  [...difficultyButtons.children].forEach((b) => b.classList.remove('selected'));
+  tablesCheckboxes.classList.add('hidden');
+  tablesCheckboxes.innerHTML = '';
+
+  // Hoofdrekenen-keuze resetten
+  state.exerciseType = null;
+  hoofdrekenenButtons.innerHTML = '';
+
+  tablemodeGroup.classList.toggle('hidden', !isTafels);
+  modeGroup.classList.toggle('hidden', !isTafels);
+  difficultyGroup.classList.toggle('hidden', !isTafels);
+
+  if (isTafels) {
+    buildTableCheckboxes(state.grade);
+    hoofdrekenenGroup.classList.add('hidden');
+  } else if (state.grade === 3) {
+    // 3de leerjaar heeft maar 1 hoofdrekenen-oefening: geen knop nodig, meteen kiezen.
+    state.exerciseType = HOOFDREKENEN_OPTIONS[3][0].value;
+    hoofdrekenenGroup.classList.add('hidden');
+  } else {
+    buildHoofdrekenenButtons(state.grade);
+    hoofdrekenenGroup.classList.remove('hidden');
+  }
+
+  countGroup.classList.remove('hidden');
+  timerToggleGroup.classList.remove('hidden');
 
   checkReadyToStart();
 });
@@ -158,6 +236,25 @@ difficultyButtons.addEventListener('click', (e) => {
   checkReadyToStart();
 });
 
+function buildHoofdrekenenButtons(grade) {
+  hoofdrekenenButtons.innerHTML = '';
+  HOOFDREKENEN_OPTIONS[grade].forEach((opt) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.dataset.exercise = opt.value;
+    btn.textContent = opt.label;
+    hoofdrekenenButtons.appendChild(btn);
+  });
+}
+
+hoofdrekenenButtons.addEventListener('click', (e) => {
+  const btn = e.target.closest('.choice-btn');
+  if (!btn) return;
+  state.exerciseType = btn.dataset.exercise;
+  [...hoofdrekenenButtons.children].forEach((b) => b.classList.toggle('selected', b === btn));
+  checkReadyToStart();
+});
+
 countButtons.addEventListener('click', (e) => {
   const btn = e.target.closest('.choice-btn');
   if (!btn) return;
@@ -167,9 +264,20 @@ countButtons.addEventListener('click', (e) => {
 });
 
 function checkReadyToStart() {
-  const grade3Ready = state.grade === 3 ? !!(state.difficulty && state.questionCount) : true;
-  const tableModeReady = state.tableMode === 'custom' ? state.selectedTables.length > 0 : !!state.tableMode;
-  startBtn.disabled = !(state.grade && state.mode && tableModeReady && grade3Ready);
+  if (!state.grade || !state.category || !state.questionCount) {
+    startBtn.disabled = true;
+    return;
+  }
+
+  let categoryReady;
+  if (state.category === 'tafels') {
+    const tableModeReady = state.tableMode === 'custom' ? state.selectedTables.length > 0 : !!state.tableMode;
+    categoryReady = tableModeReady && !!state.mode && !!state.difficulty;
+  } else {
+    categoryReady = !!state.exerciseType;
+  }
+
+  startBtn.disabled = !categoryReady;
 }
 
 startBtn.addEventListener('click', startGame);
@@ -189,12 +297,10 @@ answerForm.addEventListener('submit', (e) => {
 
 // ---- Spel opbouwen ----
 function startGame() {
-  state.totalQuestions = state.grade === 3 ? state.questionCount : 10;
-  state.timerEnabled = state.grade === 3 && timerToggleCheckbox.checked;
+  state.totalQuestions = state.questionCount;
+  state.timerEnabled = timerToggleCheckbox.checked;
 
-  const difficulty = state.grade === 3 ? state.difficulty : 'normaal';
-  const tables = state.tableMode === 'custom' ? state.selectedTables : TABLES_BY_GRADE[state.grade];
-  state.questions = generateQuestions(tables, state.mode, state.totalQuestions, difficulty);
+  state.questions = generateQuestionsForRound();
   state.currentIndex = 0;
   state.score = 0;
   state.correctCount = 0;
@@ -204,6 +310,26 @@ function startGame() {
 
   showScreen(quizScreen);
   renderQuestion();
+}
+
+function generateQuestionsForRound() {
+  if (state.category === 'tafels') {
+    const tables = state.tableMode === 'custom' ? state.selectedTables : TABLES_BY_GRADE[state.grade];
+    return generateTableQuestions(tables, state.mode, state.totalQuestions, state.difficulty);
+  }
+
+  switch (state.exerciseType) {
+    case 'splitsen':
+      return generateSplitQuestions(state.totalQuestions);
+    case 'brug':
+      return generateBridgeQuestions(state.totalQuestions);
+    case 'optellen100':
+      return generateAddSubQuestions(state.totalQuestions, 100);
+    case 'optellen1000':
+      return generateAddSubQuestions(state.totalQuestions, 1000);
+    default:
+      return [];
+  }
 }
 
 function pickWeightedTable(tables, difficulty) {
@@ -219,7 +345,7 @@ function pickWeightedTable(tables, difficulty) {
   return weighted[Math.floor(Math.random() * weighted.length)];
 }
 
-function generateQuestions(tables, mode, count, difficulty) {
+function generateTableQuestions(tables, mode, count, difficulty) {
   const questions = [];
 
   for (let i = 0; i < count; i++) {
@@ -241,6 +367,60 @@ function generateQuestions(tables, mode, count, difficulty) {
     }
   }
 
+  return questions;
+}
+
+// Splitsen tot 10: bv. "3 + ? = 7" of "? + 4 = 7".
+function generateSplitQuestions(count) {
+  const questions = [];
+  for (let i = 0; i < count; i++) {
+    const total = 2 + Math.floor(Math.random() * 9); // 2..10
+    const knownPart = 1 + Math.floor(Math.random() * (total - 1)); // 1..total-1
+    const missingPart = total - knownPart;
+    const knownFirst = Math.random() < 0.5;
+    const text = knownFirst
+      ? `${knownPart} + ? = ${total}`
+      : `? + ${knownPart} = ${total}`;
+    questions.push({ text, answer: missingPart });
+  }
+  return questions;
+}
+
+// Optellen en aftrekken met brug over het tiental, tot 20 (bv. 8 + 5 = 13, 13 - 5 = 8).
+function generateBridgeQuestions(count) {
+  const questions = [];
+  for (let i = 0; i < count; i++) {
+    if (Math.random() < 0.5) {
+      const a = 2 + Math.floor(Math.random() * 8); // 2..9
+      const minB = Math.max(2, 11 - a);
+      const maxB = Math.min(9, 20 - a);
+      const b = minB + Math.floor(Math.random() * (maxB - minB + 1));
+      questions.push({ text: `${a} + ${b} = ?`, answer: a + b });
+    } else {
+      const a = 11 + Math.floor(Math.random() * 8); // 11..18
+      const minB = Math.max(2, a - 9);
+      const maxB = Math.min(9, a - 1);
+      const b = minB + Math.floor(Math.random() * (maxB - minB + 1));
+      questions.push({ text: `${a} - ${b} = ?`, answer: a - b });
+    }
+  }
+  return questions;
+}
+
+// Optellen en aftrekken tot een maximum (100 voor 2de, 1000 voor 3de leerjaar). Nooit een negatief antwoord.
+function generateAddSubQuestions(count, max) {
+  const questions = [];
+  for (let i = 0; i < count; i++) {
+    if (Math.random() < 0.5) {
+      const a = 1 + Math.floor(Math.random() * (max - 1));
+      const b = 1 + Math.floor(Math.random() * (max - a));
+      questions.push({ text: `${a} + ${b} = ?`, answer: a + b });
+    } else {
+      const a = 2 + Math.floor(Math.random() * (max - 1)); // 2..max
+      const b = 1 + Math.floor(Math.random() * (a - 1)); // 1..a-1
+      questions.push({ text: `${a} - ${b} = ?`, answer: a - b });
+    }
+  }
   return questions;
 }
 
@@ -400,19 +580,28 @@ function saveHistory(sessions) {
   }
 }
 
+function buildModeLabel() {
+  if (state.category === 'tafels') {
+    const modeLabels = { maal: 'Maaltafels', deel: 'Deeltafels', mix: 'Mix' };
+    return modeLabels[state.mode] || state.mode;
+  }
+  return EXERCISE_LABELS[state.exerciseType] || state.exerciseType;
+}
+
 function saveRoundToHistory() {
   const sessions = loadHistory();
 
-  const modeLabels = { maal: 'Maaltafels', deel: 'Deeltafels', mix: 'Mix' };
-  const tablesLabel = state.tableMode === 'custom'
-    ? `tafels van ${[...state.selectedTables].sort((a, b) => a - b).join(', ')}`
-    : 'alle tafels';
+  const tablesLabel = state.category === 'tafels'
+    ? (state.tableMode === 'custom'
+      ? `tafels van ${[...state.selectedTables].sort((a, b) => a - b).join(', ')}`
+      : 'alle tafels')
+    : null;
 
   const session = {
     date: new Date().toISOString(),
     grade: state.grade,
-    mode: state.mode,
-    modeLabel: modeLabels[state.mode] || state.mode,
+    category: state.category,
+    modeLabel: buildModeLabel(),
     difficulty: state.difficulty,
     tablesLabel,
     timerEnabled: state.timerEnabled,
@@ -435,7 +624,8 @@ function formatSessionLabel(session) {
     hour: '2-digit',
     minute: '2-digit',
   });
-  return `${dateStr} - ${session.grade}de leerjaar - ${session.modeLabel} - ${session.correctCount}/${session.total}`;
+  const categoryLabel = session.category === 'hoofdrekenen' ? 'Hoofdrekenen' : 'Tafels';
+  return `${dateStr} - ${session.grade}de leerjaar - ${categoryLabel}: ${session.modeLabel} - ${session.correctCount}/${session.total}`;
 }
 
 // ---- Overzichtscherm ----
@@ -468,12 +658,19 @@ function openOverview() {
   };
 }
 
+function sessionDetailLabel(session) {
+  if (session.category === 'hoofdrekenen') {
+    return session.modeLabel;
+  }
+  return session.tablesLabel || 'alle tafels';
+}
+
 function renderSessionDetail(sessions, index) {
   const session = sessions[index];
   if (!session) return;
 
   const timerLabel = session.timerEnabled ? 'timer aan' : 'timer uit';
-  sessionMeta.textContent = `${session.tablesLabel || 'alle tafels'} - ${timerLabel} - Score: ${session.score} punten - ${session.correctCount} van de ${session.total} juist`;
+  sessionMeta.textContent = `${sessionDetailLabel(session)} - ${timerLabel} - Score: ${session.score} punten - ${session.correctCount} van de ${session.total} juist`;
 
   sessionTableBody.innerHTML = '';
   session.questions.forEach((q, i) => {
@@ -519,7 +716,7 @@ function downloadSessionAsPdf(session) {
   doc.text(`Leerjaar: ${session.grade}de leerjaar - ${session.modeLabel}`, margin, y);
   y += 6;
   const timerLabel = session.timerEnabled ? 'timer aan' : 'timer uit';
-  doc.text(`Tafels: ${session.tablesLabel || 'alle tafels'} - ${timerLabel}`, margin, y);
+  doc.text(`${sessionDetailLabel(session)} - ${timerLabel}`, margin, y);
   y += 6;
   doc.text(`Score: ${session.score} punten - ${session.correctCount} van de ${session.total} juist`, margin, y);
   y += 10;

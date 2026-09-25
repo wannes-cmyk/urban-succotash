@@ -26,6 +26,7 @@ const EXERCISE_LABELS = {
   optellen1000: 'Optellen & aftrekken (tot 1000)',
 };
 
+const WORKSHEET_FULL_PAGE_COUNT = 60; // zoveel sommen passen op één A4 in 3 kolommen
 const TIME_PER_QUESTION_MS = 10000; // 10 seconden per vraag, als de timer aan staat
 const HISTORY_KEY = 'tafelspelGeschiedenis';
 const MAX_HISTORY_SESSIONS = 20;
@@ -75,6 +76,9 @@ const timerToggleGroup = document.getElementById('timer-toggle-group');
 const timerToggleCheckbox = document.getElementById('timer-toggle-checkbox');
 const startBtn = document.getElementById('start-btn');
 const overviewMenuBtn = document.getElementById('overview-menu-btn');
+const printLinks = document.getElementById('print-links');
+const printCountBtn = document.getElementById('print-count-btn');
+const printPageBtn = document.getElementById('print-page-btn');
 
 const questionCounter = document.getElementById('question-counter');
 const scoreCounter = document.getElementById('score-counter');
@@ -266,6 +270,7 @@ countButtons.addEventListener('click', (e) => {
 function checkReadyToStart() {
   if (!state.grade || !state.category || !state.questionCount) {
     startBtn.disabled = true;
+    printLinks.classList.add('hidden');
     return;
   }
 
@@ -278,12 +283,16 @@ function checkReadyToStart() {
   }
 
   startBtn.disabled = !categoryReady;
+  printLinks.classList.toggle('hidden', !categoryReady);
+  printCountBtn.textContent = `🖨️ Print ${state.questionCount} oefeningen`;
 }
 
 startBtn.addEventListener('click', startGame);
 replayBtn.addEventListener('click', startGame);
 menuBtn.addEventListener('click', () => showScreen(startScreen));
 overviewMenuBtn.addEventListener('click', () => openOverview());
+printCountBtn.addEventListener('click', () => downloadWorksheetPdf(state.questionCount));
+printPageBtn.addEventListener('click', () => downloadWorksheetPdf(WORKSHEET_FULL_PAGE_COUNT));
 viewOverviewBtn.addEventListener('click', () => openOverview());
 overviewBackBtn.addEventListener('click', () => showScreen(startScreen));
 
@@ -300,7 +309,7 @@ function startGame() {
   state.totalQuestions = state.questionCount;
   state.timerEnabled = timerToggleCheckbox.checked;
 
-  state.questions = generateQuestionsForRound();
+  state.questions = generateQuestionsForRound(state.totalQuestions);
   state.currentIndex = 0;
   state.score = 0;
   state.correctCount = 0;
@@ -312,21 +321,21 @@ function startGame() {
   renderQuestion();
 }
 
-function generateQuestionsForRound() {
+function generateQuestionsForRound(count) {
   if (state.category === 'tafels') {
     const tables = state.tableMode === 'custom' ? state.selectedTables : TABLES_BY_GRADE[state.grade];
-    return generateTableQuestions(tables, state.mode, state.totalQuestions, state.difficulty);
+    return generateTableQuestions(tables, state.mode, count, state.difficulty);
   }
 
   switch (state.exerciseType) {
     case 'splitsen':
-      return generateSplitQuestions(state.totalQuestions);
+      return generateSplitQuestions(count);
     case 'brug':
-      return generateBridgeQuestions(state.totalQuestions);
+      return generateBridgeQuestions(count);
     case 'optellen100':
-      return generateAddSubQuestions(state.totalQuestions, 100);
+      return generateAddSubQuestions(count, 100);
     case 'optellen1000':
-      return generateAddSubQuestions(state.totalQuestions, 1000);
+      return generateAddSubQuestions(count, 1000);
     default:
       return [];
   }
@@ -588,14 +597,17 @@ function buildModeLabel() {
   return EXERCISE_LABELS[state.exerciseType] || state.exerciseType;
 }
 
+function buildTablesLabel() {
+  if (state.category !== 'tafels') return null;
+  return state.tableMode === 'custom'
+    ? `tafels van ${[...state.selectedTables].sort((a, b) => a - b).join(', ')}`
+    : 'alle tafels';
+}
+
 function saveRoundToHistory() {
   const sessions = loadHistory();
 
-  const tablesLabel = state.category === 'tafels'
-    ? (state.tableMode === 'custom'
-      ? `tafels van ${[...state.selectedTables].sort((a, b) => a - b).join(', ')}`
-      : 'alle tafels')
-    : null;
+  const tablesLabel = buildTablesLabel();
 
   const session = {
     date: new Date().toISOString(),
@@ -743,4 +755,75 @@ function downloadSessionAsPdf(session) {
 
   const fileDate = d.toISOString().slice(0, 10);
   doc.save(`tafelspel-overzicht-${fileDate}.pdf`);
+}
+
+// ---- Werkblad afdrukken ----
+// Maakt een PDF met de huidige instellingen: pagina 1 is het werkblad, pagina 2 de oplossingen.
+function downloadWorksheetPdf(count) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  const questions = generateQuestionsForRound(count);
+
+  const margin = 15;
+  const columns = 3;
+  const columnWidth = (210 - 2 * margin) / columns;
+  const rowsPerColumn = Math.ceil(questions.length / columns);
+
+  const settingsLabel = [
+    `${state.grade}de leerjaar`,
+    buildModeLabel(),
+    buildTablesLabel(),
+  ].filter(Boolean).join(' - ');
+
+  // Werkblad
+  let y = margin;
+  doc.setFontSize(18);
+  doc.setTextColor(23, 44, 102);
+  doc.text('Tafels Kampioen - Werkblad', margin, y);
+  y += 8;
+
+  doc.setFontSize(11);
+  doc.setTextColor(80, 80, 80);
+  doc.text(settingsLabel, margin, y);
+  y += 10;
+
+  doc.setTextColor(23, 44, 102);
+  doc.text('Naam: ______________________', margin, y);
+  doc.text('Datum: ______________', margin + 80, y);
+  doc.text(`Score: _____ / ${questions.length}`, margin + 140, y);
+  y += 12;
+
+  const rowHeight = Math.min(12, (297 - margin - y) / rowsPerColumn);
+  doc.setFontSize(13);
+  questions.forEach((q, i) => {
+    const col = Math.floor(i / rowsPerColumn);
+    const row = i % rowsPerColumn;
+    const x = margin + col * columnWidth;
+    doc.text(`${i + 1}.`, x, y + row * rowHeight);
+    doc.text(q.text.replace('?', '______'), x + 9, y + row * rowHeight);
+  });
+
+  // Oplossingen
+  doc.addPage();
+  y = margin;
+  doc.setFontSize(16);
+  doc.text('Oplossingen', margin, y);
+  y += 7;
+  doc.setFontSize(11);
+  doc.setTextColor(80, 80, 80);
+  doc.text(settingsLabel, margin, y);
+  y += 10;
+
+  doc.setFontSize(11);
+  doc.setTextColor(23, 44, 102);
+  const keyRowHeight = Math.min(8, (297 - margin - y) / rowsPerColumn);
+  questions.forEach((q, i) => {
+    const col = Math.floor(i / rowsPerColumn);
+    const row = i % rowsPerColumn;
+    const x = margin + col * columnWidth;
+    doc.text(`${i + 1}. ${q.text.replace('?', String(q.answer))}`, x, y + row * keyRowHeight);
+  });
+
+  const fileDate = new Date().toISOString().slice(0, 10);
+  doc.save(`tafelspel-werkblad-${fileDate}.pdf`);
 }

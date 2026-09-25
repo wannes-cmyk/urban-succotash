@@ -19,6 +19,15 @@ Een klein browserspelletje om tafels en hoofdrekenen te oefenen, gemaakt voor he
 5. Beantwoord de sommen door het antwoord in te typen en op "Check!" te drukken (of Enter).
 6. Op het einde krijg je je score en 1 tot 3 sterren.
 
+## Werkblad afdrukken
+
+Wil je liever op papier oefenen? Maak eerst alle keuzes op het startscherm. Onder de "Start!"-knop verschijnen dan twee links:
+
+- **"🖨️ Print X oefeningen"**: een werkblad met het aantal oefeningen dat je koos (10, 20, 30 of 50).
+- **"🖨️ Print een volle pagina (60 oefeningen)"**: een volledig gevuld A4-werkblad.
+
+Je krijgt een PDF met op pagina 1 het werkblad (naam, datum, score en de sommen in 3 kolommen met invulstreepjes) en op pagina 2 de oplossingen. Druk enkel pagina 1 af als je de oplossingen niet op papier wil. Elke klik geeft nieuwe, willekeurige sommen. Afgedrukte werkbladen komen niet in de geschiedenis.
+
 ## Overzicht en PDF
 
 Elke gespeelde ronde wordt lokaal opgeslagen in de browser (localStorage), met per vraag: het gegeven antwoord, het juiste antwoord, en of het juist of fout was.
@@ -36,4 +45,4 @@ Zuiver HTML, CSS en vanilla JavaScript, plus [jsPDF](https://github.com/parallax
 
 - `index.html` - structuur van de vier schermen (start, quiz, resultaat, overzicht)
 - `style.css` - kleurrijke, kindvriendelijke styling
-- `script.js` - spellogica: vragen genereren voor tafels én hoofdrekenen (splitsen, brug over het tiental, optellen/aftrekken tot 100 of 1000), timer, score bijhouden, geschiedenis in localStorage, PDF-export
+- `script.js` - spellogica: vragen genereren voor tafels én hoofdrekenen (splitsen, brug over het tiental, optellen/aftrekken tot 100 of 1000), timer, score bijhouden, geschiedenis in localStorage, PDF-export van rondes en printbare werkbladen

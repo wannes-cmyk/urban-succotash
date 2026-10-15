@@ -93,6 +93,23 @@ h1 {
   color: white;
 }
 
+.choice-btn.correct {
+  background: var(--success);
+  border-color: var(--success);
+  color: white;
+}
+
+.choice-btn.wrong {
+  background: var(--error);
+  border-color: var(--error);
+  color: white;
+}
+
+.choice-btn:disabled {
+  cursor: default;
+  transform: none;
+}
+
 .primary-btn {
   width: 100%;
   padding: 16px;
@@ -270,6 +287,11 @@ h1 {
   color: var(--dark);
 }
 
+#question-text.digital-clock {
+  font-family: 'Courier New', monospace;
+  letter-spacing: 2px;
+}
+
 .answer-form {
   display: flex;
   gap: 10px;
@@ -314,6 +336,12 @@ h1 {
 .answer-form .primary-btn {
   width: auto;
   padding: 16px 20px;
+}
+
+.clockset-colon {
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: var(--dark);
 }
 
 .feedback {

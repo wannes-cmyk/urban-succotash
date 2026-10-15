@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Tafels Kampioen</title>
-<link rel="stylesheet" href="style.css?v=3">
+<link rel="stylesheet" href="style.css?v=4">
 </head>
 <body>
 
@@ -28,6 +28,7 @@
         <div class="choice-buttons" id="category-buttons">
           <button class="choice-btn" data-category="tafels">Tafels ✖️➗</button>
           <button class="choice-btn" data-category="hoofdrekenen">Hoofdrekenen ➕➖</button>
+          <button class="choice-btn" data-category="klok">Klok lezen 🕐</button>
         </div>
       </div>
 
@@ -60,6 +61,34 @@
       <div class="choice-group hidden" id="hoofdrekenen-group">
         <h2>Welke oefening?</h2>
         <div class="choice-buttons" id="hoofdrekenen-buttons"></div>
+      </div>
+
+      <div class="choice-group hidden" id="klok-level-group">
+        <h2>Welk niveau?</h2>
+        <div class="choice-buttons" id="klok-level-buttons">
+          <button class="choice-btn" data-level="1">Hele uren (7:00)</button>
+          <button class="choice-btn" data-level="2">Halve uren (7:30)</button>
+          <button class="choice-btn" data-level="3">Kwartieren (7:15, 7:45)</button>
+          <button class="choice-btn" data-level="4">Vijfminutenstappen (7:25, 7:35)</button>
+          <button class="choice-btn" data-level="5">Elke minuut (7:22)</button>
+        </div>
+      </div>
+
+      <div class="choice-group hidden" id="klok-questiontype-group">
+        <h2>Welk vraagtype?</h2>
+        <div class="choice-buttons" id="klok-questiontype-buttons">
+          <button class="choice-btn" data-questiontype="A">Meerkeuze (tijd in woorden kiezen)</button>
+          <button class="choice-btn" data-questiontype="C">Klok instellen (cijfers intypen)</button>
+          <button class="choice-btn" data-questiontype="mix">Gemengd</button>
+        </div>
+      </div>
+
+      <div class="choice-group hidden" id="klok-24h-group">
+        <h2>Notatie</h2>
+        <label class="toggle-row">
+          <input type="checkbox" id="klok-24h-checkbox">
+          <span>🕐 24-uursnotatie (ook tijden na de middag, bv. 19:45)</span>
+        </label>
       </div>
 
       <div class="choice-group hidden" id="count-group">
@@ -115,6 +144,15 @@
         <button type="submit" class="primary-btn">Check!</button>
       </form>
 
+      <div id="choice-options" class="choice-buttons hidden"></div>
+
+      <form id="clockset-form" class="answer-form hidden" autocomplete="off">
+        <input type="number" id="clockset-hour-input" class="answer-input" inputmode="numeric" placeholder="uu" required>
+        <span class="clockset-colon">:</span>
+        <input type="number" id="clockset-minute-input" class="answer-input" inputmode="numeric" placeholder="mm" required>
+        <button type="submit" class="primary-btn">Check!</button>
+      </form>
+
       <p id="feedback-text" class="feedback"></p>
     </section>
 
@@ -167,6 +205,6 @@
   </main>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="script.js?v=3"></script>
+  <script src="script.js?v=4"></script>
 </body>
 </html>
